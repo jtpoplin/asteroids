@@ -1,5 +1,5 @@
 import pygame
-from constants import SCREEN_WIDTH, SCREEN_HEIGHT
+from constants import SCREEN_WIDTH, SCREEN_HEIGHT, ASTEROID_SPAWN_RATE_SECONDS
 from logger import log_state, log_event
 from player import Player
 from asteroid import Asteroid
@@ -22,7 +22,10 @@ def main() -> None:
     Shot.containers = (shots, updatable, drawable)
 
     player = Player(x = SCREEN_WIDTH / 2, y = SCREEN_HEIGHT / 2)
-    AsteroidField()
+    asteroid_field = AsteroidField()
+
+    score = 0
+    lives = 3
 
     clock = pygame.time.Clock()
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -38,15 +41,30 @@ def main() -> None:
         updatable.update(dt)
 
         for asteroid in asteroids:
+            if asteroid.collides_with(player):
+                log_event("player_hit")
+                lives -=1
+                if lives <= 0:
+                    print("Game over!")
+                    sys.exit()
+                else:
+                    print(f"Lives left: {lives}")
+                    player.position = pygame.Vector2(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
+                    for a in asteroids:
+                        a.kill()
+                    break 
+
+            
             for shot in shots:
                 if shot.collides_with(asteroid):
                     log_event("asteroid_shot")
                     shot.kill()
                     asteroid.split()
-            if asteroid.collides_with(player):
-                log_event("player_hit")
-                print("Game over!")
-                sys.exit()
+
+                    score += 100
+
+        new_rate = ASTEROID_SPAWN_RATE_SECONDS - (score / 1000 * 0.1)
+        asteroid_field.spawn_rate = max(0.3, new_rate)
         
         screen.fill("black")
         for draw in drawable:
