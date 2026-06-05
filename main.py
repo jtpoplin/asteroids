@@ -11,11 +11,19 @@ import sys
 def main() -> None:
     pygame.init()
 
+    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+
+    bg_image = pygame.image.load("asteroidslogo.png").convert()
+    bg_image = pygame.transform.scale(bg_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
+
+    dimmer = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
+    dimmer.set_alpha(150) 
+    dimmer.fill((0, 0, 0))
+
     updatable = pygame.sprite.Group()
     drawable = pygame.sprite.Group()
     asteroids = pygame.sprite.Group()
     shots = pygame.sprite.Group()
-
 
     Player.containers = (updatable, drawable)
     Asteroid.containers = (asteroids, updatable, drawable)
@@ -26,14 +34,10 @@ def main() -> None:
     asteroid_field = AsteroidField()
 
     ui = UI(35)
-
     score = 0
     lives = 3
-
-    clock = pygame.time.Clock()
-    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     dt = 0.0
-
+    clock = pygame.time.Clock()
 
     while True:
         log_state()
@@ -70,10 +74,11 @@ def main() -> None:
         new_rate = ASTEROID_SPAWN_RATE_SECONDS - (score / 1000 * 0.1)
         asteroid_field.spawn_rate = max(0.3, new_rate)
         
-        screen.fill("black")
-        for draw in drawable:
-            draw.draw(screen) 
+        screen.blit(bg_image, (0, 0))
+        screen.blit(dimmer, (0, 0))
 
+        for draw in drawable:
+            draw.draw(screen)
         ui.draw(screen, score, lives)
 
         pygame.display.flip()
