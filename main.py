@@ -6,6 +6,7 @@ from asteroid import Asteroid
 from asteroidfield import AsteroidField
 from shot import Shot
 from ui import UI
+from laser import Laser
 import sys
 
 def main() -> None:
@@ -29,6 +30,7 @@ def main() -> None:
     Asteroid.containers = (asteroids, updatable, drawable)
     AsteroidField.containers = (updatable,)
     Shot.containers = (shots, updatable, drawable)
+    Laser.containers = (shots, updatable, drawable)
 
     player = Player(x = SCREEN_WIDTH / 2, y = SCREEN_HEIGHT / 2)
     asteroid_field = AsteroidField()
@@ -46,6 +48,16 @@ def main() -> None:
                 return
         
         updatable.update(dt)
+
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_k] and player.can_bomb():
+            player.reset_bomb_timer()
+            player.explosion_visual_timer = 0.3
+            explosion_radius = 200
+            for asteroid in list(asteroids):
+                if player.position.distance_to(asteroid.position) < explosion_radius + asteroid.radius:
+                    asteroid.kill()
+                    score += 50
 
         for asteroid in asteroids:
             if asteroid.collides_with(player):
@@ -65,11 +77,12 @@ def main() -> None:
             
             for shot in shots:
                 if shot.collides_with(asteroid):
-                    log_event("asteroid_shot")
-                    shot.kill()
-                    asteroid.split()
-
-                    score += 100
+                    if shot.alive():
+                        log_event("asteroid_shot")
+                        if not isinstance(shot, Laser):
+                            shot.kill()
+                        asteroid.split()
+                        score += 100
 
         new_rate = ASTEROID_SPAWN_RATE_SECONDS - (score / 1000 * 0.1)
         asteroid_field.spawn_rate = max(0.3, new_rate)
@@ -79,6 +92,13 @@ def main() -> None:
 
         for draw in drawable:
             draw.draw(screen)
+        
+
+        if player.explosion_visual_timer > 0:
+            if int(player.explosion_visual_timer * 50) % 2 == 0:
+                pygame.draw.circle(screen, (255, 255, 0), player.position, 200, 4)
+                pygame.draw.circle(screen, (255, 165, 0), player.position, 100, 2)
+
         ui.draw(screen, score, lives)
 
         pygame.display.flip()

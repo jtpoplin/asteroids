@@ -1,6 +1,7 @@
 from constants import PLAYER_RADIUS, LINE_WIDTH, PLAYER_TURN_SPEED, PLAYER_SPEED, PLAYER_SHOOT_SPEED, PLAYER_SHOOT_COOLDOWN_SECONDS, SCREEN_WIDTH, SCREEN_HEIGHT
 from circleshape import CircleShape
 from shot import Shot
+from laser import Laser
 import pygame
 
 class Player(CircleShape):
@@ -9,6 +10,9 @@ class Player(CircleShape):
         super().__init__(x, y, PLAYER_RADIUS)
         self.rotation = 0
         self.cooldown = 0
+        self.bomb_cooldown = 0
+        self.laser_cooldown = 0
+        self.explosion_visual_timer = 0
     
     # in the Player class
     def triangle(self) -> list[pygame.Vector2]:
@@ -27,6 +31,8 @@ class Player(CircleShape):
     
     def update(self, dt: float) -> None:
         self.cooldown -= dt
+        self.bomb_cooldown -= dt
+        self.laser_cooldown -= dt
 
         keys = pygame.key.get_pressed()
 
@@ -40,6 +46,11 @@ class Player(CircleShape):
             self.move(-dt)
         if keys[pygame.K_SPACE]:
             self.shoot()
+        if keys[pygame.K_l]:
+            self.shoot_laser()
+        
+        if self.explosion_visual_timer > 0:
+            self.explosion_visual_timer -= dt
 
         # Check the Right edge
         if self.position.x > SCREEN_WIDTH + self.radius:
@@ -73,3 +84,16 @@ class Player(CircleShape):
         rotated = forward.rotate(self.rotation)
         fast = rotated * PLAYER_SHOOT_SPEED
         shot.velocity = fast
+    
+    def can_bomb(self):
+        return self.bomb_cooldown <= 0
+    
+    def reset_bomb_timer(self):
+        self.bomb_cooldown = 5.0
+    
+    def shoot_laser(self):
+        if self.laser_cooldown > 0:
+            return
+        self.laser_cooldown = 0.5
+        laser = Laser(self.position.x, self.position.y)
+        laser.velocity = pygame.Vector2(0, 1).rotate(self.rotation) * PLAYER_SHOOT_SPEED * 1.5
