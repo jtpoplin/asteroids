@@ -8,6 +8,7 @@ from shot import Shot
 from ui import UI
 from laser import Laser
 import sys
+import random
 
 def main() -> None:
     pygame.init()
@@ -18,7 +19,7 @@ def main() -> None:
     bg_image = pygame.transform.scale(bg_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
 
     dimmer = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
-    dimmer.set_alpha(150) 
+    dimmer.set_alpha(200) 
     dimmer.fill((0, 0, 0))
 
     updatable = pygame.sprite.Group()
@@ -36,6 +37,7 @@ def main() -> None:
     asteroid_field = AsteroidField()
 
     ui = UI(35)
+    game_time = 0.0
     score = 0
     lives = 3
     dt = 0.0
@@ -48,6 +50,7 @@ def main() -> None:
                 return
         
         updatable.update(dt)
+        game_time += dt
 
         keys = pygame.key.get_pressed()
         if keys[pygame.K_k] and player.can_bomb():
@@ -59,6 +62,21 @@ def main() -> None:
                     asteroid.kill()
                     score += 50
 
+        if keys[pygame.K_j] and player.can_hellfire():
+            player.reset_hellfire_timer()
+            player.hellfire_visual_timer = 0.5
+            player.hellfire_points = []
+            for _ in range(4):                
+                rand_x = random.randint(0, SCREEN_WIDTH)
+                rand_y = random.randint(0, SCREEN_HEIGHT)
+                point = pygame.Vector2(rand_x, rand_y)
+                player.hellfire_points.append(point)
+                explosion_radius = 250 # Even bigger than the bomb!
+                for asteroid in list(asteroids):
+                    if point.distance_to(asteroid.position) < explosion_radius + asteroid.radius:
+                        asteroid.kill() # Total destruction
+                        score += 25 
+        
         for asteroid in asteroids:
             if asteroid.collides_with(player):
                 log_event("player_hit")
@@ -66,6 +84,7 @@ def main() -> None:
                 if lives <= 0:
                     print("Game over!")
                     ui.save_high_score(score)
+                    ui.save_best_time(game_time)
                     sys.exit()
                 else:
                     print(f"Lives left: {lives}")
@@ -99,7 +118,13 @@ def main() -> None:
                 pygame.draw.circle(screen, (255, 255, 0), player.position, 200, 4)
                 pygame.draw.circle(screen, (255, 165, 0), player.position, 100, 2)
 
-        ui.draw(screen, score, lives)
+        if player.hellfire_visual_timer > 0:
+            if int(player.hellfire_visual_timer * 40) % 2 == 0:
+                for point in player.hellfire_points:
+                    pygame.draw.circle(screen, (255, 0, 0), point, 250, 5)
+                    pygame.draw.circle(screen, (255, 69, 0), point, 125, 3)
+        
+        ui.draw(screen, score, lives, game_time)
 
         pygame.display.flip()
         dt = clock.tick(60) / 1000

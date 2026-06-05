@@ -7,10 +7,20 @@ class Asteroid(CircleShape):
 
     def __init__(self, x: float, y: float, radius: float) -> None:
         super().__init__(x, y, radius)
+        self.points_count = random.randint(8, 12)
+        self.offsets = []
+        for _ in range(self.points_count):
+            self.offsets.append(random.uniform(0.7, 1.0))
     
     def draw(self, screen):
-        pygame.draw.circle(screen, "white", self.position, self.radius, LINE_WIDTH)
-    
+        polygon_points = []
+        for i in range(self.points_count):
+            angle = (i / self.points_count) * 360
+            point_dist = self.radius * self.offsets[i]
+            vector = pygame.Vector2(0, point_dist).rotate(angle)
+            polygon_points.append(self.position + vector)
+        pygame.draw.polygon(screen, "white", polygon_points, 2)
+ 
     def update(self, dt: float) -> None:
         self.position += (self.velocity * dt)
 

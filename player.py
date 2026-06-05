@@ -13,6 +13,9 @@ class Player(CircleShape):
         self.bomb_cooldown = 0
         self.laser_cooldown = 0
         self.explosion_visual_timer = 0
+        self.hellfire_cooldown = 0
+        self.hellfire_visual_timer = 0
+        self.hellfire_points = []
     
     # in the Player class
     def triangle(self) -> list[pygame.Vector2]:
@@ -24,7 +27,7 @@ class Player(CircleShape):
         return [a, b, c]
     
     def draw(self, screen):
-        pygame.draw.polygon(screen, "white", self.triangle(), LINE_WIDTH)
+        pygame.draw.polygon(screen, "white", self.triangle(), 0)
     
     def rotate(self, dt):
         self.rotation += PLAYER_TURN_SPEED * dt
@@ -33,6 +36,9 @@ class Player(CircleShape):
         self.cooldown -= dt
         self.bomb_cooldown -= dt
         self.laser_cooldown -= dt
+        self.hellfire_cooldown -= dt
+        if self.hellfire_visual_timer > 0:
+            self.hellfire_visual_timer -= dt
 
         keys = pygame.key.get_pressed()
 
@@ -97,3 +103,9 @@ class Player(CircleShape):
         self.laser_cooldown = 0.5
         laser = Laser(self.position.x, self.position.y)
         laser.velocity = pygame.Vector2(0, 1).rotate(self.rotation) * PLAYER_SHOOT_SPEED * 1.5
+
+    def can_hellfire(self):
+        return self.hellfire_cooldown <= 0
+    
+    def reset_hellfire_timer(self):
+        self.hellfire_cooldown = 15.0
