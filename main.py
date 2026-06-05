@@ -5,6 +5,7 @@ from player import Player
 from asteroid import Asteroid
 from asteroidfield import AsteroidField
 from shot import Shot
+from ui import UI
 import sys
 
 def main() -> None:
@@ -23,6 +24,8 @@ def main() -> None:
 
     player = Player(x = SCREEN_WIDTH / 2, y = SCREEN_HEIGHT / 2)
     asteroid_field = AsteroidField()
+
+    ui = UI(35)
 
     score = 0
     lives = 3
@@ -46,6 +49,7 @@ def main() -> None:
                 lives -=1
                 if lives <= 0:
                     print("Game over!")
+                    ui.save_high_score(score)
                     sys.exit()
                 else:
                     print(f"Lives left: {lives}")
@@ -69,6 +73,8 @@ def main() -> None:
         screen.fill("black")
         for draw in drawable:
             draw.draw(screen) 
+
+        ui.draw(screen, score, lives)
 
         pygame.display.flip()
         dt = clock.tick(60) / 1000
