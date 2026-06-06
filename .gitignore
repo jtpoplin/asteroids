@@ -1,0 +1,25 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+.python-version
+
+# Log files
+game_state.jsonl
+game_events.jsonl
+
+# Virtual environments
+.venv
+
+# UV files
+uv.lock
+
+# Git files
+.git
+
+# Personal stat files
+besttime.txt
+highscore.txt
