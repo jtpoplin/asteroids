@@ -21,8 +21,6 @@ This project uses uv and runs with a single command without manually setting up 
 
     uv run main.py
 
-Can Windows users run this?
-
 Controls
 
     W/S: Move Forward / Backward
