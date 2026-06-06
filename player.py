@@ -83,13 +83,16 @@ class Player(CircleShape):
     def shoot(self):
         if self.cooldown > 0:
             return
-        else:
-            self.cooldown = PLAYER_SHOOT_COOLDOWN_SECONDS
-        shot = Shot(self.position.x, self.position.y)
-        forward = pygame.Vector2(0, 1)
-        rotated = forward.rotate(self.rotation)
-        fast = rotated * PLAYER_SHOOT_SPEED
-        shot.velocity = fast
+        self.cooldown = PLAYER_SHOOT_COOLDOWN_SECONDS
+        
+        base_velocity = pygame.Vector2(0, 1).rotate(self.rotation) * PLAYER_SHOOT_SPEED
+        
+        spread_angle = 15 
+        
+        shot_left = Shot(self.position.x, self.position.y)
+        shot_left.velocity = base_velocity.rotate(-spread_angle)
+        shot_right = Shot(self.position.x, self.position.y)
+        shot_right.velocity = base_velocity.rotate(spread_angle)
     
     def can_bomb(self):
         return self.bomb_cooldown <= 0

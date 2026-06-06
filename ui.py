@@ -43,6 +43,7 @@ class UI:
                 f.write(str(current_time))
 
     def draw(self, screen, score, lives, game_time):
+
         m, s = divmod(int(game_time), 60)
         bm, bs = divmod(int(self.best_time), 60)      
 
@@ -51,16 +52,35 @@ class UI:
         
         time_surf = self.font.render(f"Time: {m:02}:{s:02}", True, "white")
         best_surf = self.font.render(f"Best: {bm:02}:{bs:02}", True, (200, 200, 200))
-        
-        lives_surf = self.font.render(f"Lives: {lives}", True, "white")
 
         screen.blit(score_surf, (10, 10))
         screen.blit(high_surf, (10, 50))        
 
-        time_x = (SCREEN_WIDTH // 2) - (time_surf.get_width() // 2)
-        screen.blit(time_surf, (time_x, 10))
-        best_x = (SCREEN_WIDTH // 2) - (best_surf.get_width() // 2)
-        screen.blit(best_surf, (best_x, 50))     
+        heart_width = 24
+        heart_height = 22
+        gap = 12
+        total_width = (lives * heart_width) + ((lives - 1) * gap)
+        start_x = (SCREEN_WIDTH // 2) - (total_width // 2)
+        
+        for i in range(lives):
+            x = start_x + (i * (heart_width + gap))
+            y = 20
+            
+            points = [
+                (x, y + heart_height // 2),
+                (x + heart_width, y + heart_height // 2),
+                (x + heart_width // 2, y + heart_height)
+            ]
+            pygame.draw.polygon(screen, "white", points)            
+ 
+            circle_radius = heart_width // 4 + 1
 
-        lives_x = SCREEN_WIDTH - lives_surf.get_width() - 10
-        screen.blit(lives_surf, (lives_x, 10))
+            pygame.draw.circle(screen, "white", (x + circle_radius, y + circle_radius), circle_radius)
+
+            pygame.draw.circle(screen, "white", (x + heart_width - circle_radius, y + circle_radius), circle_radius)       
+
+        time_x = SCREEN_WIDTH - time_surf.get_width() - 10
+        screen.blit(time_surf, (time_x, 10))
+        
+        best_x = SCREEN_WIDTH - best_surf.get_width() - 10
+        screen.blit(best_surf, (best_x, 50))
