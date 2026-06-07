@@ -13,6 +13,7 @@ class Player(CircleShape):
         self.bomb_cooldown = 0
         self.laser_cooldown = 0
         self.explosion_visual_timer = 0
+        self.triple_shot_cooldown = 0
         self.hellfire_cooldown = 0
         self.hellfire_visual_timer = 0
         self.hellfire_points = []
@@ -37,6 +38,7 @@ class Player(CircleShape):
         self.bomb_cooldown -= dt
         self.laser_cooldown -= dt
         self.hellfire_cooldown -= dt
+        self.triple_shot_cooldown -= dt
         if self.hellfire_visual_timer > 0:
             self.hellfire_visual_timer -= dt
 
@@ -52,6 +54,8 @@ class Player(CircleShape):
             self.move(-dt)
         if keys[pygame.K_SPACE]:
             self.shoot()
+        if keys[pygame.K_SEMICOLON]:
+            self.shoot_triple()
         if keys[pygame.K_l]:
             self.shoot_laser()
         
@@ -84,15 +88,9 @@ class Player(CircleShape):
         if self.cooldown > 0:
             return
         self.cooldown = PLAYER_SHOOT_COOLDOWN_SECONDS
-        
-        base_velocity = pygame.Vector2(0, 1).rotate(self.rotation) * PLAYER_SHOOT_SPEED
-        
-        spread_angle = 15 
-        
-        shot_left = Shot(self.position.x, self.position.y)
-        shot_left.velocity = base_velocity.rotate(-spread_angle)
-        shot_right = Shot(self.position.x, self.position.y)
-        shot_right.velocity = base_velocity.rotate(spread_angle)
+    
+        shot = Shot(self.position.x, self.position.y)
+        shot.velocity = pygame.Vector2(0, 1).rotate(self.rotation) * PLAYER_SHOOT_SPEED
     
     def can_bomb(self):
         return self.bomb_cooldown <= 0
@@ -103,7 +101,8 @@ class Player(CircleShape):
     def shoot_laser(self):
         if self.laser_cooldown > 0:
             return
-        self.laser_cooldown = 0.5
+        self.laser_cooldown = 0.6
+        self.cooldown = 0.3
         laser = Laser(self.position.x, self.position.y)
         laser.velocity = pygame.Vector2(0, 1).rotate(self.rotation) * PLAYER_SHOOT_SPEED * 1.5
 
@@ -112,3 +111,16 @@ class Player(CircleShape):
     
     def reset_hellfire_timer(self):
         self.hellfire_cooldown = 15.0
+    
+    def shoot_triple(self):
+        if self.triple_shot_cooldown > 0:
+            return    
+        self.triple_shot_cooldown = 1.5 
+        self.cooldown = 0.2 
+
+        base_velocity = pygame.Vector2(0, 1).rotate(self.rotation) * PLAYER_SHOOT_SPEED
+        angles = [-20, 0, 20]
+    
+        for angle in angles:
+            shot = Shot(self.position.x, self.position.y)
+            shot.velocity = base_velocity.rotate(angle)
