@@ -25,9 +25,10 @@ Controls
 
     W/S: Move Forward / Backward
     A/D: Rotate Ship
-    Space: Twin Spread-Shot
+    Space: Single-shot main weapon
     L: Piercing Laser
     K: Pulse Bomb
     J: Hellfire (Global Strike)
+    ;: Triple-shot
 
 Game generates locally besttime.txt and highscore.txt files for stat tracking.
